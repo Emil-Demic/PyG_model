@@ -21,8 +21,8 @@ loader_image_test = DataLoader(dataset_image_test, batch_size=args.batch_size * 
 
 model = TripletModel()
 model.cuda()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-# scheduler = lr_scheduler.StepLR(optimizer, 5, gamma=0.1, last_epoch=-1)
+optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+scheduler = lr_scheduler.StepLR(optimizer, 10, gamma=0.1, last_epoch=-1)
 loss = TripletMarginLoss()
 loss.cuda()
 
@@ -65,7 +65,7 @@ for epoch in range(args.epochs):
             batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
             batch.img = batch.img.view(-1, 3, 224, 224)
             out = model.get_embedding(batch, True)
-            sketch_out_list.append(out.cpu().numpy()[0])
+            sketch_out_list.append(out.cpu().numpy())
 
         image_out_list = []
         for batch in tqdm.tqdm(loader_image_test):
@@ -74,9 +74,12 @@ for epoch in range(args.epochs):
             batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
             batch.img = batch.img.view(-1, 3, 224, 224)
             out = model.get_embedding(batch, False)
-            image_out_list.append(out.cpu().numpy()[0])
+            image_out_list.append(out.cpu().numpy())
 
-        dis = compute_view_specific_distance(np.array(sketch_out_list).flatten(), np.array(image_out_list).flatten())
+        sketch_out_list = np.concatenate(sketch_out_list)
+        image_out_list = np.concatenate(image_out_list)
+
+        dis = compute_view_specific_distance(sketch_out_list, image_out_list)
 
         num = dis.shape[0]
         top1, top5, top10, top20 = calculate_accuracy(dis)
