@@ -27,7 +27,7 @@ loss = TripletMarginLoss()
 loss.cuda()
 
 model.train()
-for epoch in range(3):
+for epoch in range(args.epochs):
     running_loss = 0.0
     for i, batch in enumerate(loader):
         batch.cuda()
@@ -76,7 +76,7 @@ for epoch in range(3):
             out = model.get_embedding(batch, False)
             image_out_list.append(out.cpu().numpy()[0])
 
-        dis = compute_view_specific_distance(np.array(sketch_out_list), np.array(image_out_list))
+        dis = compute_view_specific_distance(np.array(sketch_out_list).flatten(), np.array(image_out_list).flatten())
 
         num = dis.shape[0]
         top1, top5, top10, top20 = calculate_accuracy(dis)
