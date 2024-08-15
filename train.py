@@ -61,7 +61,7 @@ for epoch in range(3):
             batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
             batch.img = batch.img.view(-1, 3, 224, 224)
             out = model.get_embedding(batch, True)
-            sketch_out_list.append(out.cpu().numpy()[0])
+            sketch_out_list.append(out.cpu().numpy())
 
         image_out_list = []
         for batch in tqdm.tqdm(loader_image_test):
@@ -69,9 +69,12 @@ for epoch in range(3):
             batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
             batch.img = batch.img.view(-1, 3, 224, 224)
             out = model.get_embedding(batch, False)
-            image_out_list.append(out.cpu().numpy()[0])
+            image_out_list.append(out.cpu().numpy())
 
-        dis = compute_view_specific_distance(np.array(sketch_out_list), np.array(image_out_list))
+        sketch_out_list = np.concatenate(sketch_out_list)
+        image_out_list = np.concatenate(image_out_list)
+
+        dis = compute_view_specific_distance(sketch_out_list, image_out_list)
 
         num = dis.shape[0]
         top1, top5, top10, top20 = calculate_accuracy(dis)
