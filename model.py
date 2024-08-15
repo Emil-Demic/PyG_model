@@ -29,9 +29,9 @@ class Model1(torch.nn.Module):
         global_features = torch.repeat_interleave(global_features, torch.bincount(batch), dim=0)
         x = torch.concat((x, global_features), dim=1)
         x = self.fc1(x)
-        # x = to_dense_batch(x, batch)
+        x = to_dense_batch(x, batch)
         # x = self.conv1(x[0], edge_index)
-        x = torch.mean(x, dim=1)
+        x = torch.mean(x[0], dim=1)
         return x
 
 
