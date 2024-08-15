@@ -2,4 +2,7 @@
 data
 test
 train
-__pycache
+__pycache__
+
+tmp.py
+test.py
