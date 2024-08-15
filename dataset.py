@@ -69,8 +69,8 @@ class DatasetTrain(InMemoryDataset):
     def process(self):
         data_list = []
 
-        file_list = os.listdir("train/sketch/GraphFeatures/")[:-30]
-        file_list = [x.split(".")[0] for x in file_list]
+        file_list = os.listdir("train/sketch/GraphFeatures/")
+        file_list = [x.split(".")[0] for x in file_list[:-30]]
         csv_files_sketch = "train/sketch/GraphFeatures/"
         jpg_files_sketch = "train/sketch/Image/"
         csv_files_image = "train/image/GraphFeatures/"
@@ -143,8 +143,8 @@ class DatasetSketchTest(InMemoryDataset):
     def process(self):
         data_list = []
 
-        file_list = os.listdir("test/sketch/GraphFeatures/")[-30:]
-        file_list = [x.split(".")[0] for x in file_list]
+        file_list = os.listdir("test/sketch/GraphFeatures/")
+        file_list = [x.split(".")[0] for x in file_list[-30:]]
         csv_files_sketch = "test/sketch/GraphFeatures"
         jpg_files_sketch = "test/sketch/Image"
 
@@ -189,8 +189,8 @@ class DatasetImageTest(InMemoryDataset):
     def process(self):
         data_list = []
 
-        file_list = os.listdir("test/image/GraphFeatures/")[-30:]
-        file_list = [x.split(".")[0] for x in file_list]
+        file_list = os.listdir("test/image/GraphFeatures/")
+        file_list = [x.split(".")[0] for x in file_list[-30:]]
         csv_files_image = "test/image/GraphFeatures/"
         jpg_files_image = "test/image/Image/"
 
