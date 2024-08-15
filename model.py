@@ -11,10 +11,14 @@ class Model1(torch.nn.Module):
         super().__init__()
         self.conv1 = DenseGATConv(512, 512)
         self.fc1 = torch.nn.Linear(4096, 512)
-        model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
-        self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
-        model_i = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
-        self.feature_extractor_image = Sequential(*(list(model_i.children())[:-2]))
+        model_s = maxvit_t(weights=MaxVit_T_Weights.DEFAULT)
+        model_s.classifier = Identity()
+        self.feature_extractor_sketch = model_s
+        # self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
+        model_i = maxvit_t(weights=MaxVit_T_Weights.DEFAULT)
+        model_i.classifier = Identity()
+        self.feature_extractor_image = model_i
+        # self.feature_extractor_image = Sequential(*(list(model_i.children())[:-2]))
         self.global_pool = torch.nn.AdaptiveAvgPool2d((1, 1))
 
     def forward(self, x, edge_index, img, batch, sketch=True):
