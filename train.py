@@ -30,6 +30,7 @@ model.train()
 for epoch in range(3):
     running_loss = 0.0
     for i, batch in enumerate(loader):
+        batch.cuda()
         batch.x_a = torch.hstack((batch.x_a_batch.unsqueeze(1), batch.x_a))
         batch.x_p = torch.hstack((batch.x_p_batch.unsqueeze(1), batch.x_p))
         batch.x_n = torch.hstack((batch.x_n_batch.unsqueeze(1), batch.x_n))
