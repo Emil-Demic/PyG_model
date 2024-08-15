@@ -10,7 +10,7 @@ class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
         # self.conv1 = DenseGATConv(512, 512)
-        self.fc1 = torch.nn.Linear(2048, 512)
+        self.fc1 = torch.nn.Linear(512, 512)
         model_s = maxvit_t(weights=MaxVit_T_Weights.DEFAULT)
         model_s.classifier = Identity()
         self.feature_extractor_sketch = model_s
