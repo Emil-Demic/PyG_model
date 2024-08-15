@@ -20,9 +20,11 @@ loader_sketch_test = DataLoader(dataset_sketch_test, batch_size=args.batch_size 
 loader_image_test = DataLoader(dataset_image_test, batch_size=args.batch_size * 3, shuffle=False)
 
 model = TripletModel()
+model.cuda()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 # scheduler = lr_scheduler.StepLR(optimizer, 5, gamma=0.1, last_epoch=-1)
 loss = TripletMarginLoss()
+loss.cuda()
 
 model.train()
 for epoch in range(3):
@@ -48,15 +50,16 @@ for epoch in range(3):
         epoch_loss.backward()
         optimizer.step()
 
-        if (i % 6) == 0:
+        if (i % 5) == 0:
             # optimizer the net
             print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(i + 1),
-                  'loss_train: {:.4f}'.format(running_loss / 6),)
+                  'loss_train: {:.4f}'.format(running_loss / 5),)
             running_loss = 0.0
 
     with torch.no_grad():
         sketch_out_list = []
         for batch in tqdm.tqdm(loader_sketch_test):
+            batch.cuda()
             batch.x = torch.hstack((batch.batch.unsqueeze(1), batch.x))
             batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
             batch.img = batch.img.view(-1, 3, 224, 224)
@@ -65,6 +68,7 @@ for epoch in range(3):
 
         image_out_list = []
         for batch in tqdm.tqdm(loader_image_test):
+            batch.cuda()
             batch.x = torch.hstack((batch.batch.unsqueeze(1), batch.x))
             batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
             batch.img = batch.img.view(-1, 3, 224, 224)
