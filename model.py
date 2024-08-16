@@ -31,7 +31,7 @@ class Model1(torch.nn.Module):
         # x = self.fc1(x)
         x = to_dense_batch(x, batch)
         x = self.conv1(x[0], edge_index)
-        x = torch.mean(x[0], dim=1)
+        x = torch.mean(x, dim=1)
         return x
 
 
