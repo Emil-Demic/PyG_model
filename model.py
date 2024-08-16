@@ -9,8 +9,8 @@ from torchvision.ops import roi_align
 class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = DenseGATConv(512, 512)
-        self.fc1 = torch.nn.Linear(4096, 512)
+        self.conv1 = DenseGATConv(4096, 512)
+        # self.fc1 = torch.nn.Linear(4096, 512)
         model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
         model_i = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
@@ -28,7 +28,7 @@ class Model1(torch.nn.Module):
         global_features = global_features.squeeze((2, 3))
         global_features = torch.repeat_interleave(global_features, torch.bincount(batch), dim=0)
         x = torch.concat((x, global_features), dim=1)
-        x = self.fc1(x)
+        # x = self.fc1(x)
         x = to_dense_batch(x, batch)
         x = self.conv1(x[0], edge_index)
         x = torch.mean(x[0], dim=1)
