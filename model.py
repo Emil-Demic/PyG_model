@@ -9,7 +9,7 @@ from torchvision.ops import roi_align
 class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = DenseSAGEConv(4096, 512)
+        self.conv1 = DenseGATConv(4096, 512)
         # self.fc1 = torch.nn.Linear(4096, 512)
         model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
