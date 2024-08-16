@@ -56,6 +56,7 @@ for epoch in range(args.epochs):
             print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(i + 1),
                   'loss_train: {:.4f}'.format(running_loss / 5),)
             running_loss = 0.0
+    scheduler.step()
 
     with torch.no_grad():
         sketch_out_list = []
