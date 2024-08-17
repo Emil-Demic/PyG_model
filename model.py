@@ -32,9 +32,9 @@ class Model1(torch.nn.Module):
         x = torch.concat((x, global_features), dim=1)
         x = to_dense_batch(x, batch)
         x = self.conv1(x[0], edge_index)
-        # x = F.sigmoid(self.pool_W1(x)) * self.pool_W2(x)
-        # x = torch.sum(x, dim=1, keepdim=False)
-        x = torch.mean(x, dim=1)
+        x = F.sigmoid(self.pool_W1(x)) * self.pool_W2(x)
+        x = torch.sum(x, dim=1, keepdim=False)
+        # x = torch.mean(x, dim=1)
         return x
 
 
