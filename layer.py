@@ -24,6 +24,8 @@ class GNNLayer(torch.nn.Module):
         e = F.leaky_relu(e, 0.2)
         e = e.view(-1, n, n)
         alpha = F.softmax(e, dim=2)
+
+        # TODO ??? PRABILONO ???
         x = alpha @ x
         # sestejes oba
         return x
