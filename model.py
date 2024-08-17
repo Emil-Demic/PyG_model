@@ -33,12 +33,12 @@ class Model1(torch.nn.Module):
         x = torch.concat((x, global_features), dim=1)
         x = to_dense_batch(x, batch)
         non_zero = x[1].to(torch.int32).unsqueeze(2)
-        # count = torch.count_nonzero(x[1], dim=1).to(torch.float)
+        count = torch.count_nonzero(x[1], dim=1).to(torch.float)
         x = self.conv1(x[0], edge_index)
         x = x * non_zero
         x = F.sigmoid(self.pool_W1(x)) * (self.pool_W2(x))
         x = torch.sum(x, dim=1, keepdim=False)
-        # x = x / count.unsqueeze(1)
+        x = x / count.unsqueeze(1)
         # x = torch.mean(x, dim=1)
         return x
 
