@@ -86,6 +86,7 @@ class DatasetTrain(InMemoryDataset):
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
+        to_rgb = RGB()
 
         for file in file_list:
             input_image = Image.open(os.path.join(jpg_files_sketch, file + ".jpg"))
@@ -98,6 +99,8 @@ class DatasetTrain(InMemoryDataset):
 
             input_image = Image.open(os.path.join(jpg_files_image, file + ".jpg"))
             width, height = input_image.size
+            if input_image.mode != 'RGB':
+                input_image = to_rgb(input_image)
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height)
             num_nodes = x.shape[0]
@@ -110,6 +113,8 @@ class DatasetTrain(InMemoryDataset):
 
             input_image = Image.open(os.path.join(jpg_files_image, neg_sample + ".jpg"))
             width, height = input_image.size
+            if input_image.mode != 'RGB':
+                input_image = to_rgb(input_image)
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, neg_sample + ".csv"), width, height)
             num_nodes = x.shape[0]
@@ -196,10 +201,13 @@ class DatasetImageTest(InMemoryDataset):
 
         weights = ResNeXt50_32X4D_Weights.DEFAULT
         preprocess_image = weights.transforms()
+        to_rgb = RGB()
 
         for file in file_list:
             input_image = Image.open(os.path.join(jpg_files_image, file + ".jpg"))
             width, height = input_image.size
+            if input_image.mode != 'RGB':
+                input_image = to_rgb(input_image)
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height)
             num_nodes = x.shape[0]
