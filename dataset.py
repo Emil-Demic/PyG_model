@@ -28,7 +28,7 @@ def get_boxes(path, width, height):
             boxes.append(box)
 
     if len(boxes) == 0:
-        boxes.append(torch.zeros((1, 4)))
+        boxes.append(torch.zeros(4))
 
     if len(boxes) > 1:
         boxes = torch.stack(boxes)
