@@ -25,7 +25,7 @@ class Model1(torch.nn.Module):
         else:
             extracted_features = self.feature_extractor_image(img)
         global_features = self.global_pool(extracted_features)
-        boxes = x[:, 1:]
+        boxes = x[:, 1:] / 224.
         x = roi_align(extracted_features, x, spatial_scale=7. / 224., output_size=1)
         x = x.squeeze((2, 3))
         global_features = global_features.squeeze((2, 3))
