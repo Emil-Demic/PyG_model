@@ -1,6 +1,9 @@
 import argparse
+import torch
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--no-cuda', action='store_true', default=False,
+                    help='Disables CUDA training.')
 parser.add_argument('--epochs', type=int, default=200,
                     help='Number of epochs to train.')
 parser.add_argument('--lr', type=float, default=0.0001,
@@ -11,4 +14,4 @@ parser.add_argument('--batch_size', type=int, default=5,
                     help='Number of samples in each batch.')
 
 args = parser.parse_args()
-
+args.cuda = not args.no_cuda and torch.cuda.is_available()
