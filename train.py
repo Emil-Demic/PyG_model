@@ -20,6 +20,7 @@ loader_sketch_test = DataLoader(dataset_sketch_test, batch_size=args.batch_size 
 loader_image_test = DataLoader(dataset_image_test, batch_size=args.batch_size * 3, shuffle=False)
 
 model = TripletModel()
+pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 scheduler = lr_scheduler.StepLR(optimizer, 10, gamma=0.1, last_epoch=-1)
 loss = TripletMarginLoss()
@@ -31,6 +32,7 @@ model.train()
 for epoch in range(args.epochs):
     running_loss = 0.0
     for i, batch in enumerate(loader):
+        model.train()
         if args.cuda:
             batch.cuda()
         batch.x_a = torch.hstack((batch.x_a_batch.unsqueeze(1), batch.x_a))
@@ -61,6 +63,7 @@ for epoch in range(args.epochs):
     scheduler.step()
 
     with torch.no_grad():
+        model.eval()
         sketch_out_list = []
         for batch in tqdm.tqdm(loader_sketch_test):
             batch.cuda()
