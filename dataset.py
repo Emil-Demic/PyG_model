@@ -13,7 +13,7 @@ from torchvision.transforms.v2 import Resize, CenterCrop, Normalize, Compose, To
 from torch_geometric.data import Data
 
 
-def get_boxes(path, width, height):
+def get_boxes(path, width, height, is_sketch=True):
     boxes = []
     with open(path, "r") as f:
         csv_reader = csv.reader(f, delimiter=',')
@@ -21,10 +21,13 @@ def get_boxes(path, width, height):
             if i == 0:
                 continue
             box = torch.tensor([float(x) for x in row[2:]])
-            box[0] = box[0] / width * 224.
-            box[2] = box[2] / width * 224.
-            box[1] = box[1] / height * 224.
-            box[3] = box[3] / height * 224.
+            if is_sketch:
+                box = box * (224. / 256.)
+            else:
+                box[0] = box[0] * (464. / width) - 16
+                box[2] = box[2] * (464. / width) - 16
+                box[1] = box[1] * (464. / height) - 16
+                box[3] = box[3] * (464. / height) - 16
             boxes.append(box)
 
     if len(boxes) == 0:
@@ -76,12 +79,10 @@ class DatasetTrain(InMemoryDataset):
         csv_files_image = "train/image/GraphFeatures/"
         jpg_files_image = "train/image/Image/"
 
-        weights = ResNeXt50_32X4D_Weights.DEFAULT
-        # preprocess_image = weights.transforms()
-        preprocess_image = preprocess_sketch = Compose([
+        preprocess_image = Compose([
             RGB(),
-            Resize(224, interpolation=InterpolationMode.BILINEAR),
-            # CenterCrop(224),
+            Resize((464, 464), interpolation=InterpolationMode.BILINEAR),
+            CenterCrop(448),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -89,28 +90,24 @@ class DatasetTrain(InMemoryDataset):
         preprocess_sketch = Compose([
             RGB(),
             Resize(224, interpolation=InterpolationMode.BILINEAR),
-            # CenterCrop(224),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
-        # to_rgb = RGB()
 
         for file in file_list:
             input_image = Image.open(os.path.join(jpg_files_sketch, file + ".jpg"))
             width, height = input_image.size
             input_image = preprocess_sketch(input_image)
-            x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height)
+            x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height, True)
             num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
             data_a = Data(x=x, edge_index=adj_matrix, img=input_image)
 
             input_image = Image.open(os.path.join(jpg_files_image, file + ".jpg"))
             width, height = input_image.size
-            # if input_image.mode != 'RGB':
-                # input_image = to_rgb(input_image)
             input_image = preprocess_image(input_image)
-            x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height)
+            x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height, False)
             num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
             data_p = Data(x=x, edge_index=adj_matrix, img=input_image)
@@ -121,10 +118,8 @@ class DatasetTrain(InMemoryDataset):
 
             input_image = Image.open(os.path.join(jpg_files_image, neg_sample + ".jpg"))
             width, height = input_image.size
-            # if input_image.mode != 'RGB':
-                # input_image = to_rgb(input_image)
             input_image = preprocess_image(input_image)
-            x = get_boxes(os.path.join(csv_files_image, neg_sample + ".csv"), width, height)
+            x = get_boxes(os.path.join(csv_files_image, neg_sample + ".csv"), width, height, False)
             num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
             data_n = Data(x=x, edge_index=adj_matrix, img=input_image)
@@ -163,8 +158,7 @@ class DatasetSketchTest(InMemoryDataset):
 
         preprocess_sketch = Compose([
             RGB(),
-            Resize(232, interpolation=InterpolationMode.BILINEAR),
-            CenterCrop(224),
+            Resize(224, interpolation=InterpolationMode.BILINEAR),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -174,7 +168,7 @@ class DatasetSketchTest(InMemoryDataset):
             input_image = Image.open(os.path.join(jpg_files_sketch, file + ".jpg"))
             width, height = input_image.size
             input_image = preprocess_sketch(input_image)
-            x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height)
+            x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height, True)
             num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
             data = Data(x=x, edge_index=adj_matrix, img=input_image)
@@ -207,13 +201,10 @@ class DatasetImageTest(InMemoryDataset):
         csv_files_image = "test/image/GraphFeatures/"
         jpg_files_image = "test/image/Image/"
 
-        weights = ResNeXt50_32X4D_Weights.DEFAULT
-        # preprocess_image = weights.transforms()
-        # to_rgb = RGB()
-        preprocess_image = preprocess_sketch = Compose([
+        preprocess_image = Compose([
             RGB(),
-            Resize(224, interpolation=InterpolationMode.BILINEAR),
-            # CenterCrop(224),
+            Resize((464, 464), interpolation=InterpolationMode.BILINEAR),
+            CenterCrop(448),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -221,10 +212,8 @@ class DatasetImageTest(InMemoryDataset):
         for file in file_list:
             input_image = Image.open(os.path.join(jpg_files_image, file + ".jpg"))
             width, height = input_image.size
-            # if input_image.mode != 'RGB':
-                # input_image = to_rgb(input_image)
             input_image = preprocess_image(input_image)
-            x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height)
+            x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height, False)
             num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
             data = Data(x=x, edge_index=adj_matrix, img=input_image)
