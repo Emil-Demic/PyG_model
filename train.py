@@ -28,11 +28,10 @@ if args.cuda:
     model.cuda()
     loss.cuda()
 
-model.train()
 for epoch in range(args.epochs):
     running_loss = 0.0
+    model.train()
     for i, batch in enumerate(loader):
-        model.train()
         if args.cuda:
             batch.cuda()
         batch.x_a = torch.hstack((batch.x_a_batch.unsqueeze(1), batch.x_a))
