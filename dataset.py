@@ -24,10 +24,10 @@ def get_boxes(path, width, height, is_sketch=True):
             if is_sketch:
                 box = box * (224. / 256.)
             else:
-                box[0] = box[0] * (464. / width) - 16
-                box[2] = box[2] * (464. / width) - 16
-                box[1] = box[1] * (464. / height) - 16
-                box[3] = box[3] * (464. / height) - 16
+                box[0] = box[0] * (232. / width) - 8
+                box[2] = box[2] * (232. / width) - 8
+                box[1] = box[1] * (232. / height) - 8
+                box[3] = box[3] * (232. / height) - 8
             boxes.append(box)
 
     if len(boxes) == 0:
@@ -81,8 +81,8 @@ class DatasetTrain(InMemoryDataset):
 
         preprocess_image = Compose([
             RGB(),
-            Resize((464, 464), interpolation=InterpolationMode.BILINEAR),
-            CenterCrop(448),
+            Resize((232, 232), interpolation=InterpolationMode.BILINEAR),
+            CenterCrop(224),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -203,8 +203,8 @@ class DatasetImageTest(InMemoryDataset):
 
         preprocess_image = Compose([
             RGB(),
-            Resize((464, 464), interpolation=InterpolationMode.BILINEAR),
-            CenterCrop(448),
+            Resize((232, 232), interpolation=InterpolationMode.BILINEAR),
+            CenterCrop(224),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
