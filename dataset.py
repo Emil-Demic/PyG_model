@@ -21,10 +21,10 @@ def get_boxes(path, width, height):
             if i == 0:
                 continue
             box = torch.tensor([float(x) for x in row[2:]])
-            box[0] = box[0] / width * 232.
-            box[2] = box[2] / width * 232.
-            box[1] = box[1] / height * 232.
-            box[3] = box[3] / height * 232.
+            box[0] = box[0] / width * 224.
+            box[2] = box[2] / width * 224.
+            box[1] = box[1] / height * 224.
+            box[3] = box[3] / height * 224.
             boxes.append(box)
 
     if len(boxes) == 0:
@@ -77,16 +77,24 @@ class DatasetTrain(InMemoryDataset):
         jpg_files_image = "train/image/Image/"
 
         weights = ResNeXt50_32X4D_Weights.DEFAULT
-        preprocess_image = weights.transforms()
-        preprocess_sketch = Compose([
+        # preprocess_image = weights.transforms()
+        preprocess_image = preprocess_sketch = Compose([
             RGB(),
-            Resize(232, interpolation=InterpolationMode.BILINEAR),
-            CenterCrop(224),
+            Resize(224, interpolation=InterpolationMode.BILINEAR),
+            # CenterCrop(224),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
-        to_rgb = RGB()
+        preprocess_sketch = Compose([
+            RGB(),
+            Resize(224, interpolation=InterpolationMode.BILINEAR),
+            # CenterCrop(224),
+            ToImage(),
+            ToDtype(torch.float32, scale=True),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+        # to_rgb = RGB()
 
         for file in file_list:
             input_image = Image.open(os.path.join(jpg_files_sketch, file + ".jpg"))
@@ -99,8 +107,8 @@ class DatasetTrain(InMemoryDataset):
 
             input_image = Image.open(os.path.join(jpg_files_image, file + ".jpg"))
             width, height = input_image.size
-            if input_image.mode != 'RGB':
-                input_image = to_rgb(input_image)
+            # if input_image.mode != 'RGB':
+                # input_image = to_rgb(input_image)
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height)
             num_nodes = x.shape[0]
@@ -113,8 +121,8 @@ class DatasetTrain(InMemoryDataset):
 
             input_image = Image.open(os.path.join(jpg_files_image, neg_sample + ".jpg"))
             width, height = input_image.size
-            if input_image.mode != 'RGB':
-                input_image = to_rgb(input_image)
+            # if input_image.mode != 'RGB':
+                # input_image = to_rgb(input_image)
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, neg_sample + ".csv"), width, height)
             num_nodes = x.shape[0]
@@ -200,14 +208,21 @@ class DatasetImageTest(InMemoryDataset):
         jpg_files_image = "test/image/Image/"
 
         weights = ResNeXt50_32X4D_Weights.DEFAULT
-        preprocess_image = weights.transforms()
-        to_rgb = RGB()
-
+        # preprocess_image = weights.transforms()
+        # to_rgb = RGB()
+        preprocess_image = preprocess_sketch = Compose([
+            RGB(),
+            Resize(224, interpolation=InterpolationMode.BILINEAR),
+            # CenterCrop(224),
+            ToImage(),
+            ToDtype(torch.float32, scale=True),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
         for file in file_list:
             input_image = Image.open(os.path.join(jpg_files_image, file + ".jpg"))
             width, height = input_image.size
-            if input_image.mode != 'RGB':
-                input_image = to_rgb(input_image)
+            # if input_image.mode != 'RGB':
+                # input_image = to_rgb(input_image)
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height)
             num_nodes = x.shape[0]

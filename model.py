@@ -14,7 +14,7 @@ class Model1(torch.nn.Module):
         super().__init__()
         self.pool_W1 = Linear(in_features=512, out_features=512)
         self.pool_W2 = Linear(in_features=512, out_features=512)
-        self.conv1 = DenseGATConv(4096, 512)
+        self.conv1 = GNNLayer(4096, 512)
         model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
         model_i = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
@@ -27,7 +27,7 @@ class Model1(torch.nn.Module):
         else:
             extracted_features = self.feature_extractor_image(img)
         global_features = self.global_pool(extracted_features)
-        x = roi_align(extracted_features, x, spatial_scale=7. / 232., output_size=1)
+        x = roi_align(extracted_features, x, spatial_scale=7. / 224., output_size=1)
         x = x.squeeze((2, 3))
         global_features = global_features.squeeze((2, 3))
         bincount = torch.bincount(batch)
