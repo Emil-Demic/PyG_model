@@ -14,7 +14,7 @@ class Model1(torch.nn.Module):
         super().__init__()
         self.pool_W1 = Linear(in_features=512, out_features=512)
         self.pool_W2 = Linear(in_features=512, out_features=512)
-        self.conv1 = DenseGATConv(4096, 512)
+        self.conv1 = DenseGATConv(2048, 512)
         model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         # model_s = resnext50_32x4d()
         self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
@@ -37,15 +37,16 @@ class Model1(torch.nn.Module):
         # x = torch.concat((x, global_features), dim=1)
         x = to_dense_batch(x, batch)
         global_features = global_features.unsqueeze(1)
-        x = torch.cat((global_features, x[0]), dim=1)
+        x = torch.cat((global_features, x[0][:, 1:, :]), dim=1)
         # non_zero = x[1].to(torch.int32).unsqueeze(2)
         # count = torch.count_nonzero(x[1], dim=1).to(torch.float)
-        x = self.conv1(x[0], edge_index)
+        x = self.conv1(x, edge_index)
         # x = x * non_zero
         # x = F.sigmoid(self.pool_W1(x)) * (self.pool_W2(x))
         # x = torch.sum(x, dim=1, keepdim=False)
         # x = x / count.unsqueeze(1)
-        x = torch.mean(x, dim=1)
+        # x = torch.mean(x, dim=1)
+        x = x[:, 0, :]
         return x
 
 

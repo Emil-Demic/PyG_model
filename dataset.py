@@ -30,8 +30,10 @@ def get_boxes(path, width, height, is_sketch=True):
                 box[3] = box[3] * (224. / height)
             boxes.append(box)
 
-    if len(boxes) == 0:
-        boxes.append(torch.zeros(4))
+    # if len(boxes) == 0:
+    #     boxes.append(torch.zeros(4))
+
+    boxes.insert(0, torch.zeros(4))
 
     if len(boxes) > 1:
         boxes = torch.stack(boxes)
@@ -104,7 +106,7 @@ class DatasetTrain(Dataset):
             width, height = input_image.size
             input_image = preprocess_sketch(input_image)
             x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height, True)
-            num_nodes = x.shape[0] + 1
+            num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
             data_s = Data(x=x, edge_index=adj_matrix, img=input_image)
 
@@ -112,7 +114,7 @@ class DatasetTrain(Dataset):
             width, height = input_image.size
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height, False)
-            num_nodes = x.shape[0] + 1
+            num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
             data_i = Data(x=x, edge_index=adj_matrix, img=input_image)
 
@@ -177,7 +179,7 @@ class DatasetSketchTest(Dataset):
             width, height = input_image.size
             input_image = preprocess_sketch(input_image)
             x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height, True)
-            num_nodes = x.shape[0] + 1
+            num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
             data_s = Data(x=x, edge_index=adj_matrix, img=input_image)
 
@@ -231,7 +233,7 @@ class DatasetImageTest(Dataset):
             width, height = input_image.size
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height, False)
-            num_nodes = x.shape[0] + 1
+            num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
             data_i = Data(x=x, edge_index=adj_matrix, img=input_image)
 
