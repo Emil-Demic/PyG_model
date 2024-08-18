@@ -1,5 +1,5 @@
 import torch
-from torch.nn import Sequential, Identity, Linear, Parameter, LayerNorm
+from torch.nn import Sequential, Identity, Linear, Parameter
 import torch.nn.functional as F
 from torch_geometric.nn.dense import DenseGATConv, DenseSAGEConv, DenseGraphConv
 from torch_geometric.utils import to_dense_batch
@@ -14,9 +14,7 @@ class Model1(torch.nn.Module):
         super().__init__()
         self.pool_W1 = Linear(in_features=512, out_features=512)
         self.pool_W2 = Linear(in_features=512, out_features=512)
-        self.conv1 = DenseGATConv(2048, 1024)
-        self.conv2 = DenseGATConv(1024, 512)
-        # self.norm1 = LayerNorm(512)
+        self.conv1 = DenseGATConv(2048, 512)
         model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         # model_s = resnext50_32x4d()
         self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
@@ -43,7 +41,6 @@ class Model1(torch.nn.Module):
         # non_zero = x[1].to(torch.int32).unsqueeze(2)
         # count = torch.count_nonzero(x[1], dim=1).to(torch.float)
         x = self.conv1(x, edge_index)
-        x = self.conv2(x, edge_index)
         # x = x * non_zero
         # x = F.sigmoid(self.pool_W1(x)) * (self.pool_W2(x))
         # x = torch.sum(x, dim=1, keepdim=False)
