@@ -21,10 +21,10 @@ def get_boxes(path, width, height):
             if i == 0:
                 continue
             box = torch.tensor([float(x) for x in row[2:]])
-            box[0] = box[0] / width * 224.
-            box[2] = box[2] / width * 224.
-            box[1] = box[1] / height * 224.
-            box[3] = box[3] / height * 224.
+            box[0] = box[0] / width * 232.
+            box[2] = box[2] / width * 232.
+            box[1] = box[1] / height * 232.
+            box[3] = box[3] / height * 232.
             boxes.append(box)
 
     if len(boxes) == 0:
