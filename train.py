@@ -20,7 +20,6 @@ loader_sketch_test = DataLoader(dataset_sketch_test, batch_size=args.batch_size 
 loader_image_test = DataLoader(dataset_image_test, batch_size=args.batch_size * 3, shuffle=False)
 
 model = TripletModel()
-pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 scheduler = lr_scheduler.StepLR(optimizer, 10, gamma=0.1, last_epoch=-1)
 loss = TripletMarginLoss()

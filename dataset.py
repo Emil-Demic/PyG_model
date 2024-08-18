@@ -4,7 +4,7 @@ import random
 
 import torch
 from PIL import Image
-from torch_geometric.data import InMemoryDataset, Data
+from torch_geometric.data import InMemoryDataset, Data, Dataset
 from torch_geometric.utils import dense_to_sparse
 from torchvision.models import ResNeXt50_32X4D_Weights
 from torchvision.transforms import InterpolationMode
@@ -24,10 +24,10 @@ def get_boxes(path, width, height, is_sketch=True):
             if is_sketch:
                 box = box * (224. / 256.)
             else:
-                box[0] = box[0] * (232. / width) - 8
-                box[2] = box[2] * (232. / width) - 8
-                box[1] = box[1] * (232. / height) - 8
-                box[3] = box[3] * (232. / height) - 8
+                box[0] = box[0] * (224. / width)
+                box[2] = box[2] * (224. / width)
+                box[1] = box[1] * (224. / height)
+                box[3] = box[3] * (224. / height)
             boxes.append(box)
 
     if len(boxes) == 0:
@@ -52,10 +52,9 @@ class TripletData(Data):
         return super().__inc__(key, value, *args, **kwargs)
 
 
-class DatasetTrain(InMemoryDataset):
+class DatasetTrain(Dataset):
     def __init__(self, root, transform=None, pre_transform=None):
         super(DatasetTrain, self).__init__(root, transform, pre_transform)
-        self.load(self.processed_paths[0])
 
     @property
     def raw_file_names(self):
@@ -67,10 +66,15 @@ class DatasetTrain(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return 'processed_train.pt'
+        processed_files_sketches = []
+        processed_files_images = []
+        for i in range(len(self.raw_file_names) // 4):
+            processed_files_sketches.append(f"data_sketch_train_{i}.pt")
+            processed_files_images.append(f"data_image_train_{i}.pt")
+        return processed_files_sketches + processed_files_images
 
     def process(self):
-        data_list = []
+        idx = 0
 
         file_list = os.listdir("train/sketch/GraphFeatures/")
         file_list = [x.split(".")[0] for x in file_list]
@@ -81,8 +85,8 @@ class DatasetTrain(InMemoryDataset):
 
         preprocess_image = Compose([
             RGB(),
-            Resize((232, 232), interpolation=InterpolationMode.BILINEAR),
-            CenterCrop(224),
+            Resize((224, 224), interpolation=InterpolationMode.BILINEAR),
+            # CenterCrop(448),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -102,7 +106,7 @@ class DatasetTrain(InMemoryDataset):
             x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height, True)
             num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
-            data_a = Data(x=x, edge_index=adj_matrix, img=input_image)
+            data_s = Data(x=x, edge_index=adj_matrix, img=input_image)
 
             input_image = Image.open(os.path.join(jpg_files_image, file + ".jpg"))
             width, height = input_image.size
@@ -110,33 +114,34 @@ class DatasetTrain(InMemoryDataset):
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height, False)
             num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
-            data_p = Data(x=x, edge_index=adj_matrix, img=input_image)
+            data_i = Data(x=x, edge_index=adj_matrix, img=input_image)
 
-            neg_sample = file
-            while neg_sample == file:
-                neg_sample = file_list[random.randint(0, len(file_list) - 1)]
+            torch.save(data_s, os.path.join(self.processed_dir, f'data_sketch_train_{idx}.pt'))
+            torch.save(data_i, os.path.join(self.processed_dir, f'data_image_train_{idx}.pt'))
+            idx += 1
 
-            input_image = Image.open(os.path.join(jpg_files_image, neg_sample + ".jpg"))
-            width, height = input_image.size
-            input_image = preprocess_image(input_image)
-            x = get_boxes(os.path.join(csv_files_image, neg_sample + ".csv"), width, height, False)
-            num_nodes = x.shape[0]
-            adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
-            data_n = Data(x=x, edge_index=adj_matrix, img=input_image)
+    def len(self):
+        return len(self.raw_file_names) // 4
 
-            data = TripletData(x_a=data_a.x, edge_index_a=data_a.edge_index, img_a=data_a.img,
-                               x_p=data_p.x, edge_index_p=data_p.edge_index, img_p=data_p.img,
-                               x_n=data_n.x, edge_index_n=data_n.edge_index, img_n=data_n.img,)
+    def get(self, idx):
+        data_a = torch.load(os.path.join(self.processed_dir, f'data_sketch_train_{idx}.pt'))
+        data_p = torch.load(os.path.join(self.processed_dir, f'data_image_train_{idx}.pt'))
 
-            data_list.append(data)
+        negative_idx = random.randint(0, self.len() - 1)
+        while negative_idx == idx:
+            negative_idx = random.randint(0, self.len() - 1)
 
-        self.save(data_list, self.processed_paths[0])
+        data_n = torch.load(os.path.join(self.processed_dir, f'data_image_train_{negative_idx}.pt'))
+
+        data = TripletData(x_a=data_a.x, edge_index_a=data_a.edge_index, img_a=data_a.img,
+                           x_p=data_p.x, edge_index_p=data_p.edge_index, img_p=data_p.img,
+                           x_n=data_n.x, edge_index_n=data_n.edge_index, img_n=data_n.img, )
+        return data
 
 
-class DatasetSketchTest(InMemoryDataset):
+class DatasetSketchTest(Dataset):
     def __init__(self, root, transform=None, pre_transform=None):
         super(DatasetSketchTest, self).__init__(root, transform, pre_transform)
-        self.load(self.processed_paths[0])
 
     @property
     def raw_file_names(self):
@@ -146,15 +151,18 @@ class DatasetSketchTest(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return 'processed_sketch_test.pt'
+        processed_files_sketches = []
+        for i in range(len(self.raw_file_names) // 2):
+            processed_files_sketches.append(f"data_sketch_test_{i}.pt")
+        return processed_files_sketches
 
     def process(self):
-        data_list = []
+        idx = 0
 
-        file_list = os.listdir("test/sketch/GraphFeatures/")
+        file_list = os.listdir("train/sketch/GraphFeatures/")
         file_list = [x.split(".")[0] for x in file_list]
-        csv_files_sketch = "test/sketch/GraphFeatures"
-        jpg_files_sketch = "test/sketch/Image"
+        csv_files_sketch = "train/sketch/GraphFeatures/"
+        jpg_files_sketch = "train/sketch/Image/"
 
         preprocess_sketch = Compose([
             RGB(),
@@ -171,17 +179,22 @@ class DatasetSketchTest(InMemoryDataset):
             x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height, True)
             num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
-            data = Data(x=x, edge_index=adj_matrix, img=input_image)
+            data_s = Data(x=x, edge_index=adj_matrix, img=input_image)
 
-            data_list.append(data)
+            torch.save(data_s, os.path.join(self.processed_dir, f'data_sketch_test_{idx}.pt'))
+            idx += 1
 
-        self.save(data_list, self.processed_paths[0])
+    def len(self):
+        return len(self.processed_file_names)
+
+    def get(self, idx):
+        data = torch.load(os.path.join(self.processed_dir, f'data_sketch_test_{idx}.pt'))
+        return data
 
 
-class DatasetImageTest(InMemoryDataset):
+class DatasetImageTest(Dataset):
     def __init__(self, root, transform=None, pre_transform=None):
         super(DatasetImageTest, self).__init__(root, transform, pre_transform)
-        self.load(self.processed_paths[0])
 
     @property
     def raw_file_names(self):
@@ -191,24 +204,28 @@ class DatasetImageTest(InMemoryDataset):
 
     @property
     def processed_file_names(self):
-        return 'processed_image_test.pt'
+        processed_files_images = []
+        for i in range(len(self.raw_file_names) // 2):
+            processed_files_images.append(f"data_image_test_{i}.pt")
+        return processed_files_images
 
     def process(self):
-        data_list = []
+        idx = 0
 
-        file_list = os.listdir("test/image/GraphFeatures/")
+        file_list = os.listdir("train/sketch/GraphFeatures/")
         file_list = [x.split(".")[0] for x in file_list]
-        csv_files_image = "test/image/GraphFeatures/"
-        jpg_files_image = "test/image/Image/"
+        csv_files_image = "train/image/GraphFeatures/"
+        jpg_files_image = "train/image/Image/"
 
         preprocess_image = Compose([
             RGB(),
-            Resize((232, 232), interpolation=InterpolationMode.BILINEAR),
-            CenterCrop(224),
+            Resize((224, 224), interpolation=InterpolationMode.BILINEAR),
+            # CenterCrop(448),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
+
         for file in file_list:
             input_image = Image.open(os.path.join(jpg_files_image, file + ".jpg"))
             width, height = input_image.size
@@ -216,8 +233,14 @@ class DatasetImageTest(InMemoryDataset):
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height, False)
             num_nodes = x.shape[0]
             adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
-            data = Data(x=x, edge_index=adj_matrix, img=input_image)
+            data_i = Data(x=x, edge_index=adj_matrix, img=input_image)
 
-            data_list.append(data)
+            torch.save(data_i, os.path.join(self.processed_dir, f'data_image_test_{idx}.pt'))
+            idx += 1
 
-        self.save(data_list, self.processed_paths[0])
+    def len(self):
+        return len(self.processed_file_names)
+
+    def get(self, idx):
+        data = torch.load(os.path.join(self.processed_dir, f'data_image_test_{idx}.pt'))
+        return data
