@@ -12,6 +12,8 @@ parser.add_argument('--weight_decay', type=float, default=0.,
                     help='Weight decay (L2 loss on parameters).')
 parser.add_argument('--batch_size', type=int, default=5,
                     help='Number of samples in each batch.')
+parser.add_argument('--lr_scheduler_step', type=int, default=5,
+                    help='Number of steps for learning rate scheduler.')
 
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
