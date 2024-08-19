@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn.dense import DenseGATConv
 from torch_geometric.nn.conv import TransformerConv, GATConv
 from torch_geometric.utils import to_dense_batch
-from torchvision.models import ResNeXt50_32X4D_Weights, resnext50_32x4d
+from torchvision.models import ResNeXt50_32X4D_Weights, resnext50_32x4d, vgg16, VGG16_Weights
 from torchvision.ops import roi_align
 
 from layer import GNNLayer
@@ -13,48 +13,13 @@ from layer import GNNLayer
 class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.pool_W1 = Linear(in_features=512, out_features=512)
-        self.pool_W2 = Linear(in_features=512, out_features=512)
-        # self.fc_det_in = Linear(in_features=4096, out_features=91)
-        # self.fc_cls_in = Linear(in_features=4096, out_features=91)
-        # self.fc_det_out = Linear(in_features=512, out_features=91)
-        # self.fc_cls_out = Linear(in_features=512, out_features=91)
-        # self.conv1 = GATConv(2048, 512, heads=2)
-        self.conv1 = GNNLayer(4096, 512)
-        model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
-        # model_s = resnext50_32x4d()
-        self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
-        model_i = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
-        # model_i = resnext50_32x4d()
-        self.feature_extractor_image = Sequential(*(list(model_i.children())[:-2]))
-        self.global_pool = torch.nn.AdaptiveAvgPool2d((1, 1))
+        self.feature_extractor = vgg16(weights=VGG16_Weights.DEFAULT).features
+        self.pool_method = torch.nn.AdaptiveMaxPool2d(1)
 
     def forward(self, x, edge_index, img, batch, sketch=True):
-        if sketch:
-            # extracted_features = self.feature_extractor_sketch(img)
-            extracted_features = self.feature_extractor_image(img)
-        else:
-            extracted_features = self.feature_extractor_image(img)
-        global_features = self.global_pool(extracted_features)
-        global_features = global_features.squeeze((2, 3))
-        x = roi_align(extracted_features, x, spatial_scale=7. / 224., output_size=1)
-        x = x.squeeze((2, 3))
-        bincount = torch.bincount(batch)
-        global_features = torch.repeat_interleave(global_features, bincount, dim=0)
-        x = torch.concat((x, global_features), dim=1)
-        x = to_dense_batch(x, batch)
-        # global_features = global_features.unsqueeze(1)
-        # x = torch.cat((global_features, x[0][:, 1:, :]), dim=1)
-        non_zero = x[1].to(torch.int32).unsqueeze(2)
-        count = torch.count_nonzero(x[1], dim=1).to(torch.float)
-        x = self.conv1(x[0], edge_index)
-        x = x * non_zero
-        x = F.sigmoid(self.pool_W1(x)) * (self.pool_W2(x))
-        x = torch.sum(x, dim=1, keepdim=False)
-        # x = x / count.unsqueeze(1)
-        # x = torch.mean(x, dim=1)
-        # x = x[:, 0, :]
-        return x
+        x = self.feature_extractor(img)
+        x = self.pool_method(x).view(-1, 512)
+        return F.normalize(x)
 
 
 class TripletModel(torch.nn.Module):

@@ -21,8 +21,8 @@ loader_image_test = DataLoader(dataset_image_test, batch_size=args.batch_size * 
 
 model = TripletModel()
 optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-scheduler = lr_scheduler.StepLR(optimizer, args.lr_scheduler_step, gamma=0.1, last_epoch=-1)
-loss = TripletMarginLoss()
+# scheduler = lr_scheduler.StepLR(optimizer, args.lr_scheduler_step, gamma=0.1, last_epoch=-1)
+loss = TripletMarginLoss(margin=0.2)
 if args.cuda:
     model.cuda()
     loss.cuda()
@@ -55,10 +55,10 @@ for epoch in range(args.epochs):
 
         if (i % 5) == 0:
             # optimizer the net
-            print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(i + 1),
+            print('Epoch: {:04d}'.format(epoch), 'Batch: {:04d}'.format(i + 1),
                   'loss_train: {:.4f}'.format(running_loss / 5),)
             running_loss = 0.0
-    scheduler.step()
+    # scheduler.step()
 
     with torch.no_grad():
         model.eval()

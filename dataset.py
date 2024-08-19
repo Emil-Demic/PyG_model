@@ -9,7 +9,7 @@ from torch_geometric.data import InMemoryDataset, Data, Dataset
 from torch_geometric.utils import dense_to_sparse
 from torchvision.models import ResNeXt50_32X4D_Weights
 from torchvision.transforms import InterpolationMode
-from torchvision.transforms.v2 import Resize, CenterCrop, Normalize, Compose, ToImage, ToDtype, RGB
+from torchvision.transforms.v2 import Resize, CenterCrop, Normalize, Compose, ToImage, ToDtype, RGB, ToTensor
 
 from torch_geometric.data import Data
 
@@ -87,20 +87,18 @@ class DatasetTrain(Dataset):
         jpg_files_image = "train/image/Image/"
 
         preprocess_image = Compose([
-            RGB(),
-            Resize((224, 224), interpolation=InterpolationMode.BILINEAR),
-            # CenterCrop(448),
-            ToImage(),
-            ToDtype(torch.float32, scale=True),
-            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            Resize((224, 224)),
+            ToTensor(),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
-        preprocess_sketch = Compose([
-            RGB(),
-            Resize(224, interpolation=InterpolationMode.BILINEAR),
-            ToImage(),
-            ToDtype(torch.float32, scale=True),
-            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
+        preprocess_sketch = preprocess_image
+        # preprocess_sketch = Compose([
+        #     RGB(),
+        #     Resize(224, interpolation=InterpolationMode.BILINEAR),
+        #     ToImage(),
+        #     ToDtype(torch.float32, scale=True),
+        #     Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        # ])
 
         for file in file_list:
             input_image = Image.open(os.path.join(jpg_files_sketch, file + ".jpg"))
@@ -190,11 +188,9 @@ class DatasetSketchTest(Dataset):
         jpg_files_sketch = "train/sketch/Image/"
 
         preprocess_sketch = Compose([
-            RGB(),
-            Resize(224, interpolation=InterpolationMode.BILINEAR),
-            ToImage(),
-            ToDtype(torch.float32, scale=True),
-            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            Resize((224, 224)),
+            ToTensor(),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
         for file in file_list:
@@ -254,12 +250,9 @@ class DatasetImageTest(Dataset):
         jpg_files_image = "train/image/Image/"
 
         preprocess_image = Compose([
-            RGB(),
-            Resize((224, 224), interpolation=InterpolationMode.BILINEAR),
-            # CenterCrop(448),
-            ToImage(),
-            ToDtype(torch.float32, scale=True),
-            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            Resize((224, 224)),
+            ToTensor(),
+            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
 
         for file in file_list:
