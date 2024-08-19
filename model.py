@@ -15,8 +15,8 @@ class Model1(torch.nn.Module):
         super().__init__()
         self.pool_W1 = Linear(in_features=512, out_features=512)
         self.pool_W2 = Linear(in_features=512, out_features=512)
-        self.conv1 = GATConv(2048, 512, heads=2)
-        # self.conv1 = DenseGATConv(2048, 512)
+        # self.conv1 = GATConv(2048, 512, heads=2)
+        self.conv1 = DenseGATConv(2048, 512)
         model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         # model_s = resnext50_32x4d()
         self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
@@ -34,15 +34,15 @@ class Model1(torch.nn.Module):
         global_features = global_features.squeeze((2, 3))
         x = roi_align(extracted_features, x, spatial_scale=7. / 224., output_size=1)
         x = x.squeeze((2, 3))
-        bincount = torch.bincount(batch)
-        global_features = torch.repeat_interleave(global_features, bincount, dim=0)
-        cumulative_indices = torch.cumsum(bincount, dim=0) - bincount
+        # bincount = torch.bincount(batch)
+        # global_features = torch.repeat_interleave(global_features, bincount, dim=0)
+        # cumulative_indices = torch.cumsum(bincount, dim=0) - bincount
         # expanded_indices = cumulative_indices.repeat_interleave(bincount)
-        x[cumulative_indices, :] = global_features[cumulative_indices, :]
+        # x[cumulative_indices, :] = global_features[cumulative_indices, :]
         # x = torch.concat((x, global_features), dim=1)
-        # x = to_dense_batch(x, batch)
-        # global_features = global_features.unsqueeze(1)
-        # x = torch.cat((global_features, x[0][:, 1:, :]), dim=1)
+        x = to_dense_batch(x, batch)
+        global_features = global_features.unsqueeze(1)
+        x = torch.cat((global_features, x[0][:, 1:, :]), dim=1)
         # non_zero = x[1].to(torch.int32).unsqueeze(2)
         # count = torch.count_nonzero(x[1], dim=1).to(torch.float)
         x = self.conv1(x, edge_index)
@@ -51,8 +51,8 @@ class Model1(torch.nn.Module):
         # x = torch.sum(x, dim=1, keepdim=False)
         # x = x / count.unsqueeze(1)
         # x = torch.mean(x, dim=1)
-        # x = x[:, 0, :]
-        x = x[cumulative_indices, :]
+        x = x[:, 0, :]
+        # x = x[cumulative_indices, :]
         return x
 
 
