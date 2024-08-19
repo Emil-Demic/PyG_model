@@ -20,8 +20,8 @@ loader_sketch_test = DataLoader(dataset_sketch_test, batch_size=args.batch_size 
 loader_image_test = DataLoader(dataset_image_test, batch_size=args.batch_size * 3, shuffle=False)
 
 model = TripletModel()
-optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
-scheduler = lr_scheduler.StepLR(optimizer, 10, gamma=0.1, last_epoch=-1)
+optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+scheduler = lr_scheduler.StepLR(optimizer, 4, gamma=0.1, last_epoch=-1)
 loss = TripletMarginLoss()
 if args.cuda:
     model.cuda()

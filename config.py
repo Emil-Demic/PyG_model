@@ -4,11 +4,11 @@ import torch
 parser = argparse.ArgumentParser()
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='Disables CUDA training.')
-parser.add_argument('--epochs', type=int, default=200,
+parser.add_argument('--epochs', type=int, default=20,
                     help='Number of epochs to train.')
 parser.add_argument('--lr', type=float, default=0.0001,
                     help='Initial learning rate.')
-parser.add_argument('--weight_decay', type=float, default=5e-4,
+parser.add_argument('--weight_decay', type=float, default=0.,
                     help='Weight decay (L2 loss on parameters).')
 parser.add_argument('--batch_size', type=int, default=5,
                     help='Number of samples in each batch.')
