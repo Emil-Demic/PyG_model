@@ -30,10 +30,10 @@ def get_boxes(path, width, height, is_sketch=True):
                 box[3] = box[3] * (224. / height)
             boxes.append(box)
 
-    # if len(boxes) == 0:
-    #     boxes.append(torch.zeros(4))
+    if len(boxes) == 0:
+        boxes.append(torch.zeros(4))
 
-    boxes.insert(0, torch.zeros(4))
+    # boxes.insert(0, torch.zeros(4))
 
     if len(boxes) > 1:
         boxes = torch.stack(boxes)
