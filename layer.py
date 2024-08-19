@@ -16,7 +16,7 @@ class GNNLayer(torch.nn.Module):
     def forward(self, x, adj):
         n = x.shape[1]
         x = self.W(x)
-        # wighted subnet samo x * adj
+        x_weighted = adj @ x
         x_i = torch.repeat_interleave(x, torch.ones(n, dtype=torch.int32, device="cuda:0") * n, dim=1)
         x_j = x.repeat((1, n, 1))
         x_concat = torch.cat((x_i, x_j), dim=2)
@@ -27,7 +27,8 @@ class GNNLayer(torch.nn.Module):
 
         # TODO ??? PRABILONO ???
         x = alpha @ x
-        # sestejes oba
+        x += x_weighted
+        x = F.leaky_relu(x, 0.2)
         return x
 
 

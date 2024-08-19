@@ -1,4 +1,5 @@
 import csv
+import math
 import os
 import random
 
@@ -107,16 +108,38 @@ class DatasetTrain(Dataset):
             input_image = preprocess_sketch(input_image)
             x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height, True)
             num_nodes = x.shape[0]
-            adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
-            data_s = Data(x=x, edge_index=adj_matrix, img=input_image)
+            # adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
+            centres = x.view(-1, 2, 2).mean(dim=1)
+            adj_matrix = torch.zeros((num_nodes, num_nodes))
+            for i in range(num_nodes):
+                for j in range(i, num_nodes):
+                    dist = torch.linalg.norm(centres[i, :] - centres[j, :])
+                    adj_matrix[i, j] = dist
+                    adj_matrix[j, i] = dist
+            adj_matrix = adj_matrix / math.sqrt(height ** 2 + width ** 2)
+            adj_matrix = 1 - adj_matrix
+            adj_matrix[adj_matrix < 0] = 0
+            adj_matrix = dense_to_sparse(adj_matrix)
+            data_s = Data(x=x, edge_index=adj_matrix[0], edge_attr=adj_matrix[1], img=input_image)
 
             input_image = Image.open(os.path.join(jpg_files_image, file + ".jpg"))
             width, height = input_image.size
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height, False)
             num_nodes = x.shape[0]
-            adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
-            data_i = Data(x=x, edge_index=adj_matrix, img=input_image)
+            # adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
+            centres = x.view(-1, 2, 2).mean(dim=1)
+            adj_matrix = torch.zeros((num_nodes, num_nodes))
+            for i in range(num_nodes):
+                for j in range(i, num_nodes):
+                    dist = torch.linalg.norm(centres[i, :] - centres[j, :])
+                    adj_matrix[i, j] = dist
+                    adj_matrix[j, i] = dist
+            adj_matrix = adj_matrix / torch.sqrt(torch.tensor(256 ** 2 + 256 ** 2))
+            adj_matrix = 1 - adj_matrix
+            adj_matrix[adj_matrix < 0] = 0
+            adj_matrix = dense_to_sparse(adj_matrix)
+            data_i = Data(x=x, edge_index=adj_matrix[0], edge_attr=adj_matrix[1], img=input_image)
 
             torch.save(data_s, os.path.join(self.processed_dir, f'data_sketch_train_{idx}.pt'))
             torch.save(data_i, os.path.join(self.processed_dir, f'data_image_train_{idx}.pt'))
@@ -135,9 +158,9 @@ class DatasetTrain(Dataset):
 
         data_n = torch.load(os.path.join(self.processed_dir, f'data_image_train_{negative_idx}.pt'))
 
-        data = TripletData(x_a=data_a.x, edge_index_a=data_a.edge_index, img_a=data_a.img,
-                           x_p=data_p.x, edge_index_p=data_p.edge_index, img_p=data_p.img,
-                           x_n=data_n.x, edge_index_n=data_n.edge_index, img_n=data_n.img, )
+        data = TripletData(x_a=data_a.x, edge_index_a=data_a.edge_index, edge_attr_a=data_a.edge_attr, img_a=data_a.img,
+                           x_p=data_p.x, edge_index_p=data_p.edge_index, edge_attr_p=data_p.edge_attr, img_p=data_p.img,
+                           x_n=data_n.x, edge_index_n=data_n.edge_index, edge_attr_n=data_n.edge_attr, img_n=data_n.img)
         return data
 
 
@@ -180,8 +203,19 @@ class DatasetSketchTest(Dataset):
             input_image = preprocess_sketch(input_image)
             x = get_boxes(os.path.join(csv_files_sketch, file + ".csv"), width, height, True)
             num_nodes = x.shape[0]
-            adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
-            data_s = Data(x=x, edge_index=adj_matrix, img=input_image)
+            # adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
+            centres = x.view(-1, 2, 2).mean(dim=1)
+            adj_matrix = torch.zeros((num_nodes, num_nodes))
+            for i in range(num_nodes):
+                for j in range(i, num_nodes):
+                    dist = torch.linalg.norm(centres[i, :] - centres[j, :])
+                    adj_matrix[i, j] = dist
+                    adj_matrix[j, i] = dist
+            adj_matrix = adj_matrix / torch.sqrt(torch.tensor(256 ** 2 + 256 ** 2))
+            adj_matrix = 1 - adj_matrix
+            adj_matrix[adj_matrix < 0] = 0
+            adj_matrix = dense_to_sparse(adj_matrix)
+            data_s = Data(x=x, edge_index=adj_matrix[0], edge_attr=adj_matrix[1], img=input_image)
 
             torch.save(data_s, os.path.join(self.processed_dir, f'data_sketch_test_{idx}.pt'))
             idx += 1
@@ -234,8 +268,19 @@ class DatasetImageTest(Dataset):
             input_image = preprocess_image(input_image)
             x = get_boxes(os.path.join(csv_files_image, file + ".csv"), width, height, False)
             num_nodes = x.shape[0]
-            adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
-            data_i = Data(x=x, edge_index=adj_matrix, img=input_image)
+            # adj_matrix = dense_to_sparse(torch.ones((num_nodes, num_nodes)))[0]
+            centres = x.view(-1, 2, 2).mean(dim=1)
+            adj_matrix = torch.zeros((num_nodes, num_nodes))
+            for i in range(num_nodes):
+                for j in range(i, num_nodes):
+                    dist = torch.linalg.norm(centres[i, :] - centres[j, :])
+                    adj_matrix[i, j] = dist
+                    adj_matrix[j, i] = dist
+            adj_matrix = adj_matrix / torch.sqrt(torch.tensor(256 ** 2 + 256 ** 2))
+            adj_matrix = 1 - adj_matrix
+            adj_matrix[adj_matrix < 0] = 0
+            adj_matrix = dense_to_sparse(adj_matrix)
+            data_i = Data(x=x, edge_index=adj_matrix[0], edge_attr=adj_matrix[1], img=input_image)
 
             torch.save(data_i, os.path.join(self.processed_dir, f'data_image_test_{idx}.pt'))
             idx += 1
