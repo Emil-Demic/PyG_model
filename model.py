@@ -2,7 +2,7 @@ import torch
 from torch.nn import Sequential, Identity, Linear, Parameter
 import torch.nn.functional as F
 from torch_geometric.nn.dense import DenseGATConv
-from torch_geometric.nn.conv import TransformerConv
+from torch_geometric.nn.conv import TransformerConv, GATv2Conv
 from torch_geometric.utils import to_dense_batch
 from torchvision.models import ResNeXt50_32X4D_Weights, resnext50_32x4d
 from torchvision.ops import roi_align
@@ -15,7 +15,7 @@ class Model1(torch.nn.Module):
         super().__init__()
         self.pool_W1 = Linear(in_features=512, out_features=512)
         self.pool_W2 = Linear(in_features=512, out_features=512)
-        self.conv1 = TransformerConv(2048, 512)
+        self.conv1 = GATv2Conv(2048, 512, heads=2)
         # self.conv1 = DenseGATConv(2048, 512)
         model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         # model_s = resnext50_32x4d()
