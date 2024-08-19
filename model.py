@@ -24,7 +24,7 @@ class Model1(torch.nn.Module):
             x = self.feature_extractor_sketch(img)
         else:
             x = self.feature_extractor_image(img)
-        x = self.pool_method(x).view(-1, 2048)
+        x = self.pool_method(x).view(-1, 512)
         return F.normalize(x)
 
 
