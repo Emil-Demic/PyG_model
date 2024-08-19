@@ -66,7 +66,7 @@ for epoch in range(args.epochs):
         for batch in tqdm.tqdm(loader_sketch_test):
             batch.cuda()
             batch.x = torch.hstack((batch.batch.unsqueeze(1), batch.x))
-            batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
+            # batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
             batch.img = batch.img.view(-1, 3, 224, 224)
             out = model.get_embedding(batch, True)
             sketch_out_list.append(out.cpu().numpy())
@@ -75,7 +75,7 @@ for epoch in range(args.epochs):
         for batch in tqdm.tqdm(loader_image_test):
             batch.cuda()
             batch.x = torch.hstack((batch.batch.unsqueeze(1), batch.x))
-            batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
+            # batch.edge_index = to_dense_adj(batch.edge_index, batch.batch)
             batch.img = batch.img.view(-1, 3, 224, 224)
             out = model.get_embedding(batch, False)
             image_out_list.append(out.cpu().numpy())
