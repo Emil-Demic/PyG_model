@@ -55,7 +55,7 @@ for epoch in range(args.epochs):
 
         if (i % 5) == 0:
             # optimizer the net
-            print('Epoch: {:04d}'.format(epoch), 'Batch: {:04d}'.format(i + 1),
+            print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(i),
                   'loss_train: {:.4f}'.format(running_loss / 5),)
             running_loss = 0.0
     # scheduler.step()
