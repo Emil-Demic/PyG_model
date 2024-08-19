@@ -15,6 +15,10 @@ class Model1(torch.nn.Module):
         super().__init__()
         self.pool_W1 = Linear(in_features=512, out_features=512)
         self.pool_W2 = Linear(in_features=512, out_features=512)
+        # self.fc_det_in = Linear(in_features=4096, out_features=91)
+        # self.fc_cls_in = Linear(in_features=4096, out_features=91)
+        # self.fc_det_out = Linear(in_features=512, out_features=91)
+        # self.fc_cls_out = Linear(in_features=512, out_features=91)
         # self.conv1 = GATConv(2048, 512, heads=2)
         self.conv1 = GNNLayer(4096, 512)
         model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
@@ -27,7 +31,8 @@ class Model1(torch.nn.Module):
 
     def forward(self, x, edge_index, img, batch, sketch=True):
         if sketch:
-            extracted_features = self.feature_extractor_sketch(img)
+            # extracted_features = self.feature_extractor_sketch(img)
+            extracted_features = self.feature_extractor_image(img)
         else:
             extracted_features = self.feature_extractor_image(img)
         global_features = self.global_pool(extracted_features)
@@ -46,7 +51,7 @@ class Model1(torch.nn.Module):
         x = x * non_zero
         x = F.sigmoid(self.pool_W1(x)) * (self.pool_W2(x))
         x = torch.sum(x, dim=1, keepdim=False)
-        x = x / count.unsqueeze(1)
+        # x = x / count.unsqueeze(1)
         # x = torch.mean(x, dim=1)
         # x = x[:, 0, :]
         return x
