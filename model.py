@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn.dense import DenseGATConv
 from torch_geometric.nn.conv import TransformerConv, GATConv
 from torch_geometric.utils import to_dense_batch
-from torchvision.models import ResNeXt50_32X4D_Weights, resnext50_32x4d, vgg16, VGG16_Weights
+from torchvision.models import ResNeXt101_64X4D_Weights, resnext101_64x4d, vgg16, VGG16_Weights
 from torchvision.ops import roi_align
 
 from layer import GNNLayer
@@ -14,7 +14,7 @@ class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
         # self.feature_extractor = vgg16(weights=VGG16_Weights.DEFAULT).features
-        model = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
+        model = resnext101_64x4d(weights=ResNeXt101_64X4D_Weights.DEFAULT)
         self.feature_extractor = Sequential(*list(model.children())[:-2])
         self.pool_method = torch.nn.AdaptiveMaxPool2d(1)
 
