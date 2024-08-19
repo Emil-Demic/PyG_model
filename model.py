@@ -13,17 +13,13 @@ from layer import GNNLayer
 class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.feature_extractor_sketch = vgg16(weights=VGG16_Weights.DEFAULT).features
-        self.feature_extractor_image = vgg16(weights=VGG16_Weights.DEFAULT).features
+        self.feature_extractor = vgg16(weights=VGG16_Weights.DEFAULT).features
         # model = resnext101_64x4d(weights=ResNeXt101_64X4D_Weights.DEFAULT)
         # self.feature_extractor = Sequential(*list(model.children())[:-2])
         self.pool_method = torch.nn.AdaptiveMaxPool2d(1)
 
     def forward(self, x, edge_index, img, batch, sketch=True):
-        if sketch:
-            x = self.feature_extractor_sketch(img)
-        else:
-            x = self.feature_extractor_image(img)
+        x = self.feature_extractor(img)
         x = self.pool_method(x).view(-1, 512)
         return F.normalize(x)
 
