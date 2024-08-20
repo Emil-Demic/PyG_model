@@ -87,7 +87,7 @@ class DatasetTrain(Dataset):
         jpg_files_image = "train/image/Image/"
 
         preprocess_image = Compose([
-            Resize((224, 224)),
+            Resize((224, 224), interpolation=InterpolationMode.BICUBIC),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -189,7 +189,7 @@ class DatasetSketchTest(Dataset):
         jpg_files_sketch = "train/sketch/Image/"
 
         preprocess_sketch = Compose([
-            Resize((224, 224)),
+            Resize((224, 224), interpolation=InterpolationMode.BICUBIC),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -252,7 +252,7 @@ class DatasetImageTest(Dataset):
         jpg_files_image = "train/image/Image/"
 
         preprocess_image = Compose([
-            Resize((224, 224)),
+            Resize((224, 224), interpolation=InterpolationMode.BICUBIC),
             ToImage(),
             ToDtype(torch.float32, scale=True),
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
