@@ -43,8 +43,8 @@ class Model1(torch.nn.Module):
         x = self.conv1(x[0], edge_index)
         x = x * non_zero
         x = F.sigmoid(self.pool_W1(x)) * (self.pool_W2(x))
-        x = torch.sum(x, dim=1, keepdim=False)
         x = x * non_zero
+        x = torch.sum(x, dim=1, keepdim=False)
         x = x / count.unsqueeze(1)
         # x = torch.mean(x, dim=1)
         return x
