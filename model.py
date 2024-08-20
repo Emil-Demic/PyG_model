@@ -14,7 +14,7 @@ class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
         model = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
-        self.feature_extractor = Sequential(*list(model.children())[:-3])
+        self.feature_extractor = Sequential(*list(model.children())[:-2])
         self.pool_method = torch.nn.AdaptiveMaxPool2d(1)
 
     def forward(self, x, edge_index, img, batch, sketch=True):
