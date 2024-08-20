@@ -19,7 +19,7 @@ class Model1(torch.nn.Module):
         # self.fc_cls_in = Linear(in_features=4096, out_features=91)
         # self.fc_det_out = Linear(in_features=512, out_features=91)
         # self.fc_cls_out = Linear(in_features=512, out_features=91)
-        self.conv1 = DenseGATConv(4096, 512)
+        self.conv1 = GNNLayer(4096, 512)
         model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
         model_i = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
