@@ -65,9 +65,9 @@ def calculate_accuracy_alt(query_feature_all, image_feature_all):
             query_feature.unsqueeze(0), image_feature_all[idx].unsqueeze(0))
         rank[idx] = distance.le(target_distance).sum()
 
-    rank1 = rank.le(1).sum().numpy() / rank.shape[0]
-    rank5 = rank.le(5).sum().numpy() / rank.shape[0]
-    rank10 = rank.le(10).sum().numpy() / rank.shape[0]
+    rank1 = rank.le(1).sum().numpy()
+    rank5 = rank.le(5).sum().numpy()
+    rank10 = rank.le(10).sum().numpy()
     rankM = rank.mean().numpy()
 
     return rank1, rank5, rank10, rankM
