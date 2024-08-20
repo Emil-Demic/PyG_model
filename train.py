@@ -93,5 +93,5 @@ for epoch in range(args.epochs):
         print(str(epoch + 1) + ': top10: ' + str(top10 / float(num)))
         print("top1, top5, top10:", top1, top5, top10)
 
-        top1, top5, top10 = calculate_accuracy_alt(sketch_out_list, image_out_list)
-        print("top1, top5, top10:", top1, top5, top10)
+        top1, top5, top10, meanK = calculate_accuracy_alt(sketch_out_list, image_out_list)
+        print("top1, top5, top10, meanK:", top1, top5, top10, meanK)
