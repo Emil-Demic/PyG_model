@@ -44,6 +44,7 @@ class Model1(torch.nn.Module):
         x = x * non_zero
         x = F.sigmoid(self.pool_W1(x)) * (self.pool_W2(x))
         x = torch.sum(x, dim=1, keepdim=False)
+        x = x * non_zero
         x = x / count.unsqueeze(1)
         # x = torch.mean(x, dim=1)
         return x
