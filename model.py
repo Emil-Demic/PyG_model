@@ -15,7 +15,6 @@ class Model1(torch.nn.Module):
         super().__init__()
         model = vit_b_16(weights=ViT_B_16_Weights.IMAGENET1K_SWAG_LINEAR_V1)
         self.feature_extractor = Sequential(*list(model.children())[:-1])
-        self.feature_extractor.classifier = Identity()
         self.pool_method = torch.nn.AdaptiveMaxPool2d(1)
 
     def forward(self, x, edge_index, img, batch, sketch=True):
