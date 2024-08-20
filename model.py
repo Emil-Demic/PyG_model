@@ -20,7 +20,7 @@ class Model1(torch.nn.Module):
 
     def forward(self, x, edge_index, img, batch, sketch=True):
         x = self.feature_extractor(img)
-        x = self.pool_method(x).view(-1, 768)
+        # x = self.pool_method(x).view(-1, 768)
         return F.normalize(x)
 
 
