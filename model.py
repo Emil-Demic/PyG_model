@@ -20,10 +20,10 @@ class Model1(torch.nn.Module):
         # self.fc_det_out = Linear(in_features=512, out_features=91)
         # self.fc_cls_out = Linear(in_features=512, out_features=91)
         # self.conv1 = GATConv(2048, 512, heads=2)
-        self.conv1 = GNNLayer(1536, 512)
-        model_s = convnext_tiny(weights=ConvNeXt_Tiny_Weights.DEFAULT)
+        self.conv1 = GNNLayer(4096, 512)
+        model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
-        model_i = convnext_tiny(weights=ConvNeXt_Tiny_Weights.DEFAULT)
+        model_i = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         self.feature_extractor_image = Sequential(*(list(model_i.children())[:-2]))
         self.global_pool = torch.nn.AdaptiveAvgPool2d((1, 1))
 
