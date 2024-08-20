@@ -16,7 +16,7 @@ class Model1(torch.nn.Module):
         # model = maxvit_t(weights=MaxVit_T_Weights.DEFAULT)
         # self.feature_extractor = Sequential(*list(model.children())[:-1])
         self.feature_extractor = maxvit_t(weights=MaxVit_T_Weights.DEFAULT)
-        self.feature_extractor.classifier = Identity
+        self.feature_extractor.classifier = Identity()
         self.pool_method = torch.nn.AdaptiveMaxPool2d(1)
 
     def forward(self, x, edge_index, img, batch, sketch=True):
