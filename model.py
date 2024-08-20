@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn.dense import DenseGATConv
 from torch_geometric.nn.conv import TransformerConv, GATConv
 from torch_geometric.utils import to_dense_batch
-from torchvision.models import ConvNeXt_Tiny_Weights, convnext_tiny
+from torchvision.models import resnext50_32x4d, ResNeXt50_32X4D_Weights
 from torchvision.ops import roi_align
 
 from layer import GNNLayer
@@ -21,11 +21,9 @@ class Model1(torch.nn.Module):
         # self.fc_cls_out = Linear(in_features=512, out_features=91)
         # self.conv1 = GATConv(2048, 512, heads=2)
         self.conv1 = GNNLayer(1536, 512)
-        model_s = convnext_tiny(weights=ConvNeXt_Tiny_Weights.DEFAULT)
-        # model_s = resnext50_32x4d()
+        model_s = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         self.feature_extractor_sketch = Sequential(*(list(model_s.children())[:-2]))
-        model_i = convnext_tiny(weights=ConvNeXt_Tiny_Weights.DEFAULT)
-        # model_i = resnext50_32x4d()
+        model_i = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         self.feature_extractor_image = Sequential(*(list(model_i.children())[:-2]))
         self.global_pool = torch.nn.AdaptiveAvgPool2d((1, 1))
 
@@ -42,8 +40,6 @@ class Model1(torch.nn.Module):
         global_features = torch.repeat_interleave(global_features, bincount, dim=0)
         x = torch.concat((x, global_features), dim=1)
         x = to_dense_batch(x, batch)
-        # global_features = global_features.unsqueeze(1)
-        # x = torch.cat((global_features, x[0][:, 1:, :]), dim=1)
         non_zero = x[1].to(torch.int32).unsqueeze(2)
         # count = torch.count_nonzero(x[1], dim=1).to(torch.float)
         x = self.conv1(x[0], edge_index)
@@ -52,7 +48,6 @@ class Model1(torch.nn.Module):
         x = torch.sum(x, dim=1, keepdim=False)
         # x = x / count.unsqueeze(1)
         # x = torch.mean(x, dim=1)
-        # x = x[:, 0, :]
         return x
 
 
