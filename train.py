@@ -8,7 +8,7 @@ from torch_geometric.utils import to_dense_adj
 
 from dataset import DatasetTrain, DatasetSketchTest, DatasetImageTest
 from model import TripletModel
-from utils import compute_view_specific_distance, calculate_accuracy
+from utils import compute_view_specific_distance, calculate_accuracy, calculate_accuracy_alt
 from config import args
 
 dataset = DatasetTrain("data")
@@ -87,9 +87,11 @@ for epoch in range(args.epochs):
         dis = compute_view_specific_distance(sketch_out_list, image_out_list)
 
         num = dis.shape[0]
-        top1, top5, top10, top20 = calculate_accuracy(dis)
+        top1, top5, top10 = calculate_accuracy(dis)
         print(str(epoch + 1) + ':  top1: ' + str(top1 / float(num)))
         print(str(epoch + 1) + ':  top5: ' + str(top5 / float(num)))
         print(str(epoch + 1) + ': top10: ' + str(top10 / float(num)))
-        print(str(epoch + 1) + ': top20: ' + str(top20 / float(num)))
+        print("top1, top5, top10:", top1, top5, top10)
+
+        top1, top5, top10 = calculate_accuracy_alt(sketch_out_list, image_out_list)
         print("top1, top5, top10:", top1, top5, top10)
