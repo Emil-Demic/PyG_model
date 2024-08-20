@@ -33,12 +33,6 @@ for epoch in range(args.epochs):
     for i, batch in enumerate(loader):
         if args.cuda:
             batch.cuda()
-        batch.x_a = torch.hstack((batch.x_a_batch.unsqueeze(1), batch.x_a))
-        batch.x_p = torch.hstack((batch.x_p_batch.unsqueeze(1), batch.x_p))
-        batch.x_n = torch.hstack((batch.x_n_batch.unsqueeze(1), batch.x_n))
-        batch.edge_index_a = to_dense_adj(batch.edge_index_a, batch.x_a_batch, batch.edge_attr_a)
-        batch.edge_index_p = to_dense_adj(batch.edge_index_p, batch.x_p_batch, batch.edge_attr_p)
-        batch.edge_index_n = to_dense_adj(batch.edge_index_n, batch.x_n_batch, batch.edge_attr_n)
         batch.img_a = batch.img_a.view(-1, 3, 224, 224)
         batch.img_p = batch.img_p.view(-1, 3, 224, 224)
         batch.img_n = batch.img_n.view(-1, 3, 224, 224)
@@ -65,8 +59,6 @@ for epoch in range(args.epochs):
         sketch_out_list = []
         for batch in tqdm.tqdm(loader_sketch_test):
             batch.cuda()
-            batch.x = torch.hstack((batch.batch.unsqueeze(1), batch.x))
-            batch.edge_index = to_dense_adj(batch.edge_index, batch.batch,  batch.edge_attr)
             batch.img = batch.img.view(-1, 3, 224, 224)
             out = model.get_embedding(batch, True)
             sketch_out_list.append(out.cpu().numpy())
@@ -74,8 +66,6 @@ for epoch in range(args.epochs):
         image_out_list = []
         for batch in tqdm.tqdm(loader_image_test):
             batch.cuda()
-            batch.x = torch.hstack((batch.batch.unsqueeze(1), batch.x))
-            batch.edge_index = to_dense_adj(batch.edge_index, batch.batch,  batch.edge_attr)
             batch.img = batch.img.view(-1, 3, 224, 224)
             out = model.get_embedding(batch, False)
             image_out_list.append(out.cpu().numpy())
