@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn.dense import DenseGATConv
 from torch_geometric.nn.conv import TransformerConv, GATConv
 from torch_geometric.utils import to_dense_batch
-from torchvision.models import convnext_tiny, ConvNeXt_Tiny_Weights
+from torchvision.models import convnext_base, ConvNeXt_Base_Weights
 from torchvision.ops import roi_align
 
 from layer import GNNLayer
@@ -13,7 +13,7 @@ from layer import GNNLayer
 class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        model = convnext_tiny(weights=ConvNeXt_Tiny_Weights.DEFAULT)
+        model = convnext_base(weights=ConvNeXt_Base_Weights.DEFAULT)
         self.feature_extractor = Sequential(*list(model.children())[:-2])
         self.pool_method = torch.nn.AdaptiveMaxPool2d(1)
 
