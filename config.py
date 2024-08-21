@@ -12,7 +12,7 @@ parser.add_argument('--weight_decay', type=float, default=0.,
                     help='Weight decay (L2 loss on parameters).')
 parser.add_argument('--batch_size', type=int, default=2,
                     help='Number of samples in each batch.')
-parser.add_argument('--lr_scheduler_step', type=int, default=5,
+parser.add_argument('--lr_scheduler_step', type=int, default=6,
                     help='Number of steps for learning rate scheduler.')
 
 args = parser.parse_args()
