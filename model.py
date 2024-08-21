@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn.dense import DenseGATConv
 from torch_geometric.nn.conv import TransformerConv, GATConv
 from torch_geometric.utils import to_dense_batch
-from torchvision.models import convnext_base, ConvNeXt_Base_Weights, regnet_x_16gf, RegNet_X_16GF_Weights
+from torchvision.models import convnext_base, ConvNeXt_Base_Weights, regnet_y_16gf, RegNet_Y_16GF_Weights
 from torchvision.ops import roi_align
 
 from layer import GNNLayer
@@ -13,13 +13,13 @@ from layer import GNNLayer
 class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        model = regnet_x_16gf(weights=RegNet_X_16GF_Weights.DEFAULT)
+        model = regnet_y_16gf(weights=RegNet_Y_16GF_Weights.IMAGENET1K_SWAG_LINEAR_V1)
         self.feature_extractor = Sequential(*list(model.children())[:-2])
         self.pool_method = torch.nn.AdaptiveAvgPool2d(1)
 
     def forward(self, img):
         x = self.feature_extractor(img)
-        x = self.pool_method(x).view(-1, 2048)
+        x = self.pool_method(x).view(-1, 3024)
         return F.normalize(x)
 
 
