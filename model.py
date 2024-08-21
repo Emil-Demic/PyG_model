@@ -15,7 +15,7 @@ class Model1(torch.nn.Module):
         super().__init__()
         model = vgg16(weights=VGG16_Weights.DEFAULT)
         self.feature_extractor = Sequential(*list(model.children())[:-2])
-        self.pool_method = torch.nn.AdaptiveMaxPool2d(1)
+        self.pool_method = torch.nn.AdaptiveAvgPool2d(1)
 
     def forward(self, img):
         x = self.feature_extractor(img)
