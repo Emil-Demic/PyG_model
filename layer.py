@@ -17,6 +17,7 @@ class GNNLayer(torch.nn.Module):
         n = x.shape[1]
         x = self.W(x)
         x_weighted = adj @ x
+        # x_i = torch.repeat_interleave(x, torch.ones(n, dtype=torch.int32) * n, dim=1)
         x_i = torch.repeat_interleave(x, torch.ones(n, dtype=torch.int32, device="cuda:0") * n, dim=1)
         x_j = x.repeat((1, n, 1))
         x_concat = torch.cat((x_i, x_j), dim=2)
