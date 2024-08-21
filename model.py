@@ -14,7 +14,7 @@ class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
         model = regnet_x_16gf(weights=RegNet_X_16GF_Weights.DEFAULT)
-        self.feature_extractor = Sequential(*list(model.children())[:-3])
+        self.feature_extractor = Sequential(*list(model.children())[:-2])
         self.pool_method = torch.nn.AdaptiveAvgPool2d(1)
 
     def forward(self, img):
