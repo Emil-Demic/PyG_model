@@ -90,6 +90,7 @@ for epoch in range(args.epochs):
         print("top1, top5, top10, meanK:", top1, top5, top10, meanK)
 
         if top1 > best_score[0] and top10 > best_score[1]:
+            print("saving model")
             best_score = (top1, top10)
             torch.save(model.state_dict(), "model/model_" + str(epoch) + ".pth")
             with open("model/result_" + str(epoch) + ".txt", "w") as f:
