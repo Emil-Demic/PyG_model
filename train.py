@@ -28,6 +28,8 @@ loss = TripletMarginLoss(margin=0.2)
 if args.cuda:
     loss.cuda()
 
+
+best_score = (0.0, 0.0)
 for epoch in range(args.epochs):
     running_loss = 0.0
     model.train()
@@ -86,4 +88,10 @@ for epoch in range(args.epochs):
 
         top1, top5, top10, meanK = calculate_accuracy_alt(sketch_out_list, image_out_list)
         print("top1, top5, top10, meanK:", top1, top5, top10, meanK)
+
+        if top1 > best_score[0] and top10 > best_score[1]:
+            best_score = (top1, top10)
+            torch.save(model.state_dict(), "model/model_" + str(epoch) + ".pth")
+            with open("model/result_" + str(epoch) + ".txt", "w") as f:
+                f.write(f"top1: {top1}, top5: {top5}, top10: {top10}, meanK: {meanK}")
 
