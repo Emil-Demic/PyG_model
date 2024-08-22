@@ -95,3 +95,8 @@ for epoch in range(args.epochs):
 
         top1, top5, top10, meanK = calculate_accuracy_alt(sketch_out_list, image_out_list)
         print("top1, top5, top10, meanK:", top1, top5, top10, meanK)
+
+        print("saving model")
+        torch.save(model.state_dict(), "model/model_" + str(epoch) + ".pth")
+        with open("model/result_" + str(epoch) + ".txt", "w") as f:
+            f.write(f"top1: {top1}, top5: {top5}, top10: {top10}, meanK: {meanK}")
