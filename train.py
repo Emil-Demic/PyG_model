@@ -89,11 +89,6 @@ for epoch in range(args.epochs):
         top1, top5, top10, meanK = calculate_accuracy_alt(sketch_out_list, image_out_list)
         print("top1, top5, top10, meanK:", top1, top5, top10, meanK)
 
-        print("TEST")
-        print(best_score[0])
-        print(top1 > best_score[0])
-        print(best_score[1])
-        print(top10 > best_score[1])
         if top1 > best_score[0] and top10 > best_score[1]:
             print("saving model")
             best_score = (top1, top10)
