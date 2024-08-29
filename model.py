@@ -4,22 +4,22 @@ import torch.nn.functional as F
 from torch_geometric.nn.dense import DenseGATConv
 from torch_geometric.nn.conv import TransformerConv, GATConv
 from torch_geometric.utils import to_dense_batch
-from torchvision.models import convnext_tiny, ConvNeXt_Tiny_Weights
+# from torchvision.models import convnext_tiny, ConvNeXt_Tiny_Weights
+from torchvision.models import resnext50_32x4d, ResNeXt50_32X4D_Weights
 from torchvision.ops import roi_align
 
-from layer import GNNLayer
 
 
 class Model1(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        model = convnext_tiny(weights=ConvNeXt_Tiny_Weights.DEFAULT)
+        model = resnext50_32x4d(weights=ResNeXt50_32X4D_Weights.DEFAULT)
         self.feature_extractor = Sequential(*list(model.children())[:-2])
         self.pool_method = torch.nn.AdaptiveAvgPool2d(1)
 
     def forward(self, img):
         x = self.feature_extractor(img)
-        x = self.pool_method(x).view(-1, 768)
+        x = self.pool_method(x).view(-1, 2048)
         return F.normalize(x)
 
 
