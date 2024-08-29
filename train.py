@@ -50,10 +50,8 @@ for epoch in range(args.epochs):
         epoch_loss.backward()
         optimizer.step()
 
-        if (i % 5) == 0:
-            # optimizer the net
-            print('Epoch: {:04d}'.format(epoch + 1), 'Batch: {:04d}'.format(i),
-                  'loss_train: {:.4f}'.format(running_loss / 5),)
+        if i % 5 == 4:
+            print(f'[{epoch:03d}, {i:03d}] loss: {running_loss / 5:0.5f}')
             running_loss = 0.0
     # scheduler.step()
 
