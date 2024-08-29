@@ -28,6 +28,7 @@ class TripletData(Data):
 class DatasetTrain(Dataset):
     def __init__(self, root, transform=None, pre_transform=None):
         super(DatasetTrain, self).__init__(root, transform, pre_transform)
+        random.seed(42)
 
     @property
     def raw_file_names(self):
