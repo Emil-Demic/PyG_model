@@ -184,10 +184,10 @@ class DatasetSketchTest(Dataset):
     def process(self):
         idx = 0
 
-        file_list = os.listdir("train/sketch/GraphFeatures/")
+        file_list = os.listdir("test/sketch/GraphFeatures/")
         file_list = [x.split(".")[0] for x in file_list]
-        csv_files_sketch = "train/sketch/GraphFeatures/"
-        jpg_files_sketch = "train/sketch/Image/"
+        csv_files_sketch = "test/sketch/GraphFeatures/"
+        jpg_files_sketch = "test/sketch/Image/"
 
         preprocess_sketch = Compose([
             RGB(),
@@ -248,10 +248,10 @@ class DatasetImageTest(Dataset):
     def process(self):
         idx = 0
 
-        file_list = os.listdir("train/sketch/GraphFeatures/")
+        file_list = os.listdir("test/sketch/GraphFeatures/")
         file_list = [x.split(".")[0] for x in file_list]
-        csv_files_image = "train/image/GraphFeatures/"
-        jpg_files_image = "train/image/Image/"
+        csv_files_image = "test/image/GraphFeatures/"
+        jpg_files_image = "test/image/Image/"
 
         preprocess_image = Compose([
             RGB(),
