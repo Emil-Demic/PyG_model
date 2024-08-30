@@ -8,8 +8,6 @@ from torch_geometric.data import Data, Dataset
 from torchvision.transforms import InterpolationMode
 from torchvision.transforms.v2 import Resize, Normalize, Compose, ToImage, ToDtype, RGB
 
-from torch_geometric.data import Data
-
 
 class TripletData(Data):
     def __inc__(self, key, value, *args, **kwargs):
@@ -45,7 +43,7 @@ class DatasetTrain(Dataset):
     def process(self):
         idx = 0
 
-        file_list = os.listdir("train/sketch/GraphFeatures/")
+        file_list = os.listdir("train/sketch/Image/")
         file_list = [x.split(".")[0] for x in file_list]
         jpg_files_sketch = "train/sketch/Image/"
         jpg_files_image = "train/image/Image/"
@@ -164,7 +162,7 @@ class DatasetImageTest(Dataset):
         idx = 0
 
         file_list = os.listdir("test/image/Image/")
-        file_list = sorted([x.split(".")[0] for x in file_list])
+        file_list = [x.split(".")[0] for x in file_list]
         jpg_files_image = "test/image/Image/"
 
         preprocess_image = Compose([
