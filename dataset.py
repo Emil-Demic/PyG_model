@@ -150,14 +150,13 @@ class DatasetImageTest(Dataset):
 
     @property
     def raw_file_names(self):
-        csv_files = os.listdir("test/image/GraphFeatures/")
         jpg_files = os.listdir("test/image/Image/")
-        return csv_files + jpg_files
+        return jpg_files
 
     @property
     def processed_file_names(self):
         processed_files_images = []
-        for i in range(len(self.raw_file_names) // 2):
+        for i in range(len(self.raw_file_names)):
             processed_files_images.append(f"data_image_test_{i}.pt")
         return processed_files_images
 

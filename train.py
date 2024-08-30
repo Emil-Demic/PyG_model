@@ -12,7 +12,7 @@ from utils import compute_view_specific_distance, calculate_accuracy, calculate_
 from config import args
 
 dataset = DatasetTrain("data")
-loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, follow_batch=['x_a', 'x_p', 'x_n'])
+loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
 
 dataset_sketch_test = DatasetSketchTest("data")
 dataset_image_test = DatasetImageTest("data")
