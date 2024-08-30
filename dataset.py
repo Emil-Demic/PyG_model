@@ -1,15 +1,12 @@
-import csv
-import math
+
 import os
 import random
 
 import torch
 from PIL import Image
-from torch_geometric.data import InMemoryDataset, Data, Dataset
-from torch_geometric.utils import dense_to_sparse
-from torchvision.models import ResNeXt50_32X4D_Weights
+from torch_geometric.data import Data, Dataset
 from torchvision.transforms import InterpolationMode
-from torchvision.transforms.v2 import Resize, CenterCrop, Normalize, Compose, ToImage, ToDtype, RGB, ToTensor
+from torchvision.transforms.v2 import Resize, Normalize, Compose, ToImage, ToDtype, RGB
 
 from torch_geometric.data import Data
 
@@ -32,17 +29,15 @@ class DatasetTrain(Dataset):
 
     @property
     def raw_file_names(self):
-        csv_files_sketch = os.listdir("train/sketch/GraphFeatures/")
         jpg_files_sketch = os.listdir("train/sketch/Image/")
-        csv_files_image = os.listdir("train/image/GraphFeatures/")
         jpg_files_image = os.listdir("train/image/Image/")
-        return csv_files_sketch + jpg_files_sketch + csv_files_image + jpg_files_image
+        return jpg_files_sketch + jpg_files_image
 
     @property
     def processed_file_names(self):
         processed_files_sketches = []
         processed_files_images = []
-        for i in range(len(self.raw_file_names) // 4):
+        for i in range(len(self.raw_file_names) // 2):
             processed_files_sketches.append(f"data_sketch_train_{i}.pt")
             processed_files_images.append(f"data_image_train_{i}.pt")
         return processed_files_sketches + processed_files_images
@@ -52,9 +47,7 @@ class DatasetTrain(Dataset):
 
         file_list = os.listdir("train/sketch/GraphFeatures/")
         file_list = [x.split(".")[0] for x in file_list]
-        csv_files_sketch = "train/sketch/GraphFeatures/"
         jpg_files_sketch = "train/sketch/Image/"
-        csv_files_image = "train/image/GraphFeatures/"
         jpg_files_image = "train/image/Image/"
 
         preprocess_image = Compose([
@@ -110,24 +103,22 @@ class DatasetSketchTest(Dataset):
 
     @property
     def raw_file_names(self):
-        csv_files = os.listdir("test/sketch/GraphFeatures/")
         jpg_files = os.listdir("test/sketch/Image/")
-        return csv_files + jpg_files
+        return jpg_files
 
     @property
     def processed_file_names(self):
         processed_files_sketches = []
-        for i in range(len(self.raw_file_names) // 2):
+        for i in range(len(self.raw_file_names)):
             processed_files_sketches.append(f"data_sketch_test_{i}.pt")
         return processed_files_sketches
 
     def process(self):
         idx = 0
 
-        file_list = os.listdir("train/sketch/GraphFeatures/")
+        file_list = os.listdir("test/sketch/Image/")
         file_list = [x.split(".")[0] for x in file_list]
-        csv_files_sketch = "train/sketch/GraphFeatures/"
-        jpg_files_sketch = "train/sketch/Image/"
+        jpg_files_sketch = "test/sketch/Image/"
 
         preprocess_sketch = Compose([
             RGB(),
@@ -173,10 +164,9 @@ class DatasetImageTest(Dataset):
     def process(self):
         idx = 0
 
-        file_list = os.listdir("train/sketch/GraphFeatures/")
-        file_list = [x.split(".")[0] for x in file_list]
-        csv_files_image = "train/image/GraphFeatures/"
-        jpg_files_image = "train/image/Image/"
+        file_list = os.listdir("test/image/Image/")
+        file_list = sorted([x.split(".")[0] for x in file_list])
+        jpg_files_image = "test/image/Image/"
 
         preprocess_image = Compose([
             Resize((224, 224), interpolation=InterpolationMode.BILINEAR),
