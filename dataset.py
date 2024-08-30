@@ -77,7 +77,7 @@ class DatasetTrain(Dataset):
             idx += 1
 
     def len(self):
-        return len(self.raw_file_names) // 4
+        return len(self.raw_file_names) // 2
 
     def get(self, idx):
         data_a = torch.load(os.path.join(self.processed_dir, f'data_sketch_train_{idx}.pt'))
